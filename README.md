@@ -128,10 +128,15 @@ dotgoblin var rm <set> <KEY>             # remove a variable
 
 ### Bindings
 
+Multiple directories can be bound to the same set.
+
 ```sh
-dotgoblin bind [<set-name>]    # bind current directory to a set
-dotgoblin unbind               # remove binding for current directory
-dotgoblin status               # show active set and variables
+dotgoblin bind [<set-name>]              # bind current directory to a set
+dotgoblin bind add <set-name> <dir>      # bind an arbitrary directory
+dotgoblin bind list [<set-name>]         # list all bindings (or filter by set)
+dotgoblin bind rm [<directory>]          # remove a binding (default: cwd)
+dotgoblin unbind                         # shortcut for bind rm
+dotgoblin status                         # show active set and variables
 ```
 
 If `bind` is called without a set name, an anonymous set is created automatically.
