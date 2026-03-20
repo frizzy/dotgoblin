@@ -75,6 +75,18 @@ def cli(ctx: click.Context, set_ref: str | None, dry_run: bool) -> None:
     runner.exec_command(command, env)
 
 
+def _resolve_set_name(name: str | None) -> str:
+    """Resolve a set name, falling back to the CWD binding."""
+    if name is not None:
+        return name
+    cwd = os.getcwd()
+    bound = store.get_binding(cwd)
+    if bound is None:
+        click.echo("Error: no set specified and no binding for current directory", err=True)
+        sys.exit(1)
+    return bound
+
+
 def _resolve_set_ref(ref: str | None) -> tuple[str | None, str | None]:
     """Parse a set reference like 'name', 'name:section', or ':section'."""
     if ref is None:
@@ -117,9 +129,13 @@ def set_list() -> None:
 
 
 @set_group.command("show")
-@click.argument("name")
-def set_show(name: str) -> None:
-    """Show variables in a set (secrets shown as raw expressions)."""
+@click.argument("name", required=False)
+def set_show(name: str | None) -> None:
+    """Show variables in a set (secrets shown as raw expressions).
+
+    If NAME is omitted, uses the set bound to the current directory.
+    """
+    name = _resolve_set_name(name)
     try:
         data = store.load_set(name)
     except FileNotFoundError as e:
@@ -161,9 +177,13 @@ def set_show(name: str) -> None:
 
 
 @set_group.command("edit")
-@click.argument("name")
-def set_edit(name: str) -> None:
-    """Open a set file in $EDITOR."""
+@click.argument("name", required=False)
+def set_edit(name: str | None) -> None:
+    """Open a set file in $EDITOR.
+
+    If NAME is omitted, uses the set bound to the current directory.
+    """
+    name = _resolve_set_name(name)
     try:
         path = store.set_path(name)
     except FileNotFoundError as e:
