@@ -176,6 +176,35 @@ def set_show(name: str | None) -> None:
         click.echo()
 
 
+@set_group.command("cat")
+@click.argument("name", required=False)
+@click.option("--export", is_flag=True, help="Prefix each line with `export `")
+def set_cat(name: str | None, export: bool) -> None:
+    """Print a set's fully-resolved env vars in envfile format.
+
+    Accepts NAME or NAME:SECTION. If omitted, uses the set bound to the
+    current directory. Values are shell-quoted so output is safe to
+    source/eval or redirect to a .env file.
+    """
+    set_name, section = _resolve_set_ref(name)
+    if set_name is None:
+        set_name = _resolve_set_name(None)
+
+    try:
+        env = store.resolve_set_env(set_name, section)
+    except (FileNotFoundError, KeyError) as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+
+    try:
+        env = interpolate.interpolate_env(env)
+    except RuntimeError as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+
+    click.echo(runner.format_envfile(env, export=export), nl=False)
+
+
 @set_group.command("edit")
 @click.argument("name", required=False)
 def set_edit(name: str | None) -> None:

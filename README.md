@@ -115,6 +115,7 @@ Variables are merged on top of your current shell environment.
 dotgoblin set create <name>    # create a new empty set
 dotgoblin set list             # list all sets
 dotgoblin set show <name>      # show variables (secrets shown as raw expressions)
+dotgoblin set cat <name>       # print resolved env in envfile format (--export for `export …`)
 dotgoblin set edit <name>      # open in $EDITOR
 dotgoblin set rm <name>        # delete (fails if bound)
 ```

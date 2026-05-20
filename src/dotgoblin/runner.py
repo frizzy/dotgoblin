@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import shlex
 import sys
 
 
@@ -23,3 +24,14 @@ def print_dry_run(env: dict[str, str]) -> None:
     max_key = max(len(k) for k in env)
     for key in sorted(env):
         print(f"  {key:<{max_key}} = {env[key]}")
+
+
+def format_envfile(env: dict[str, str], export: bool = False) -> str:
+    """Format env vars as a newline-terminated envfile string.
+
+    Values are shell-quoted with shlex.quote so output is safe to source/eval.
+    With export=True, prefixes each line with `export `.
+    """
+    prefix = "export " if export else ""
+    lines = [f"{prefix}{key}={shlex.quote(env[key])}" for key in sorted(env)]
+    return "\n".join(lines) + ("\n" if lines else "")
